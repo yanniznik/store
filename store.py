@@ -50,7 +50,7 @@ def listCategories():
 def getProducts(id):
     try:
         with connection.cursor() as cursor:
-            sql = "SELECT * FROM products WHERE category = {}".format(id)
+            sql = "SELECT * FROM products WHERE category = {} ORDER BY favorite desc, id".format(id)
             cursor.execute(sql)
             result = cursor.fetchall()
             return json.dumps({"STATUS": "SUCCESS", "PRODUCTS": result, "CODE": 200})
