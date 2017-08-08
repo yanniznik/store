@@ -196,6 +196,7 @@ StoreAdmin.deleteCategory = function(deleteBtn){
 		url: '/category/' + catId,
 		type: 'DELETE',
 		success: function(result) {
+			alert(result);
 			categoryToDelete.remove();
 			$("select#choose-cat").find("option[value='"+catId+"']").remove();
 			if($("select#choose-cat").find("option").length == 0){
