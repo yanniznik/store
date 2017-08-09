@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Store Admin</title>
+    <title></title>
     	<link rel="stylesheet" href="./css/common.css">
         <link rel="stylesheet" href="./css/admin.css">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -13,6 +13,7 @@
     <header>
         <nav id="categories" class="menu-btn clickable"><i class="fa fa-bars btn-icon" aria-hidden="true"></i>Manage Categories</nav>
         <nav id="products" class="menu-btn clickable"><i class="fa fa-gift btn-icon" aria-hidden="true"></i>Manage Products</nav>
+        <nav id="settings" class="menu-btn clickable"><i class="fa fa-gift btn-icon" aria-hidden="true"></i>Store Settings</nav>
         <nav id="goto" class="menu-btn clickable"><i class="fa fa-shopping-cart btn-icon" aria-hidden="true"></i>Go to Store</i></nav>
     </header>
     <hr>
@@ -20,7 +21,7 @@
         <i class="loading-spinner fa fa-cog fa-spin fa-3x fa-fw"></i>
     </section>
     <section id="welcome-page" class="admin-page">
-        <h2> Welcome to Store Admin </h2>
+        <h2> Welcome to the shop of <div class="storeName"></div> </h2>
     </section>
     <section id="categories-page" class="admin-page">
         <h2> Categories Manager </h2>
@@ -28,6 +29,14 @@
         <form id="add-category" >
             <input type="text" name="name" />
             <input type="submit" value="Add Category" />
+        </form>
+    </section>
+    <section id="settings-page" class="admin-page">
+        <h2> Settings Manager </h2>
+        <h3>Current name: <span class="storeName"></span></h3>
+        <form id="change-storename" >
+            <input type="text" name="name"/>
+            <input type="submit" value="Change Name" />
         </form>
     </section>
     <section id="products-page" class="admin-page">

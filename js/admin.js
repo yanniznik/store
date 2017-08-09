@@ -5,10 +5,51 @@ StoreAdmin.start = function(){
 		StoreAdmin.bindMenuBtns();
 		StoreAdmin.loadCategories();
 		StoreAdmin.loadProducts();
+		StoreAdmin.loadStoreName();
+		StoreAdmin.changeStoreName();
 		StoreAdmin.bineForms();
 		$("#welcome-page").fadeIn();
 	});
 };
+
+StoreAdmin.changeStoreName = function(){
+	var changeStoreNameForm = $("form#change-storename");
+	changeStoreNameForm.submit(function(e){
+		e.preventDefault();
+		var submittedForm = $(this);
+		var newStoreName = submittedForm.find("input[name='name']").val();
+		$.post("/config",{"name":newStoreName},function(result){
+			if (result["STATUS"] == "ERROR"){
+				alert(result["MSG"]);
+			}else{
+				StoreAdmin.renderStoreName(newStoreName);
+			}
+		},"json");
+		return false;
+	});
+}
+
+StoreAdmin.loadStoreName = function(){
+	$.get("/config",function(result){
+		if (result["STATUS"] == "ERROR"){
+			alert(result["MSG"]);
+		}else{
+			var storeName = result["CONFIG"]["name"];
+			StoreAdmin.renderStoreName(storeName);
+			}
+	},"json");
+};
+
+
+StoreAdmin.renderStoreName = function(storeName){
+	// updating welcome admin screen and setting screens
+	$('.storeName').each(function() {
+		$(this).text(storeName);
+	});
+	// updating the title store name
+	$("title").text(storeName);
+};
+
 
 
 StoreAdmin.bindMenuBtns = function(){
@@ -183,7 +224,7 @@ StoreAdmin.showAdminPage = function(pageToShow){
 	}else{
 		var page = $("#" + pageToShow + "-page");
 		$(".admin-page:visible").hide();
-			page.show();
+		page.show();
 		
 	}
 };

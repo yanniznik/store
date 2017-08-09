@@ -11,24 +11,54 @@ connection = create_sql_connection(config_dict)
 
 cursor = connection.cursor()
 
-@get("/admin")
-def admin_portal():
-    return template("pages/admin.html")
 @get("/")
 def index():
     return template("index.html")
+
 @get('/js/<filename:re:.*\.js>')
+
 def javascripts(filename):
     return static_file(filename, root='js')
+
 @get('/css/<filename:re:.*\.css>')
 def stylesheets(filename):
     return static_file(filename, root='css')
+
 @get('/admin')
 def admin_portal():
     return template("pages/admin.html")
+
 @get('/images/<filename:re:.*\.(jpg|png|gif|ico)>')
 def images(filename):
     return static_file(filename, root='images')
+
+@get('/config')
+def getStoreName():
+    try:
+        with connection.cursor() as cursor:
+            sql = "SELECT name FROM config where id = 1"
+            cursor.execute(sql)
+            result = cursor.fetchone()
+            return json.dumps({"STATUS": "SUCCESS", "CONFIG": result, "CODE": 200})
+    except:
+        return json.dumps({"STATUS": "ERROR", "MSG": "Internal error", "CODE": 500})
+
+@post('/config')
+def updateStoreName():
+    name = request.POST.get("name")
+    try:
+        with connection.cursor() as cursor:
+            sql = "UPDATE config set name = '{}' WHERE id = 1".format(name)
+            cursor.execute(sql)
+            connection.commit()
+            return json.dumps({"STATUS": "SUCCESS", "CODE": 201})
+    except pymysql.err.IntegrityError as e:
+        code, msg = e.args
+        if code == 1062:
+            return json.dumps({"STATUS": "ERROR", "MSG": msg, "CODE": 200})
+        else:
+            return json.dumps({"STATUS": "ERROR", "MSG": "Internal error", "CODE": 500})
+
 @get('/categories')
 def listCategories():
     try:
@@ -39,16 +69,23 @@ def listCategories():
             return json.dumps({"STATUS": "SUCCESS", "CATEGORIES": result, "CODE": 200})
     except:
         return json.dumps({"STATUS": "ERROR", "MSG": "Internal error", "CODE": 500})
-@get('/category/<id>/products')
-def getProducts(id):
+
+PRODUCTS_PER_PAGE = 5
+
+@get('/category/<id>/products/<page>')
+def getProducts(id, page='0'):
     try:
         with connection.cursor() as cursor:
-            sql = "SELECT * FROM products WHERE category = {} ORDER BY favorite desc, id".format(id)
-            cursor.execute(sql)
-            result = cursor.fetchall()
+            sql = "SELECT * FROM products WHERE category = {} ORDER BY favorite desc, id LIMIT %s OFFSET %s".format(id)
+            cursor.execute(sql, ((PRODUCTS_PER_PAGE + 1), (int(page)*PRODUCTS_PER_PAGE)))
+            result = {}
+            products = cursor.fetchall()
+            result["products"] = products[:PRODUCTS_PER_PAGE]
+            result["has_more"] = len(products) == (PRODUCTS_PER_PAGE + 1)
             return json.dumps({"STATUS": "SUCCESS", "PRODUCTS": result, "CODE": 200})
     except:
         return json.dumps({"STATUS": "ERROR", "MSG": "Internal error", "CODE": 500})
+
 @get('/products')
 def listProducts():
     try:
@@ -59,6 +96,7 @@ def listProducts():
             return json.dumps({"STATUS": "SUCCESS", "PRODUCTS": result, "CODE": 200})
     except:
         return json.dumps({"STATUS": "ERROR", "MSG": "Internal error", "CODE": 500})
+
 @get('/product/<id>')
 def getProduct(id):
     try:
@@ -69,6 +107,7 @@ def getProduct(id):
             return json.dumps({"STATUS": "SUCCESS", "PRODUCTS": result, "CODE": 200})
     except:
         return json.dumps({"STATUS": "ERROR", "MSG": "Internal error", "CODE": 500})
+
 @post('/category')
 def addCategory():
     name = request.POST.get("name")
@@ -82,7 +121,10 @@ def addCategory():
     except pymysql.err.IntegrityError as e:
         code, msg = e.args
         if code == 1062:
-            return json.dumps({"STATUS": "ERROR", "MSG": msg, "CODE": 500})
+            return json.dumps({"STATUS": "ERROR", "MSG": msg, "CODE": 200})
+        else:
+            return json.dumps({"STATUS": "ERROR", "MSG": "Internal error", "CODE": 500})
+
 @post('/product')
 def addProduct():
     isFavorite = 0
@@ -101,8 +143,13 @@ def addProduct():
             connection.commit()
             result = cursor.lastrowid
             return json.dumps({"STATUS": "SUCCESS", "PRODUCT_ID": result, "CODE": 201})
-    except:
-        return json.dumps({"STATUS": "ERROR", "MSG": "Internal error", "CODE": 500})
+    except pymysql.err.IntegrityError as e:
+        code, msg = e.args
+        if code == 1062:
+            return json.dumps({"STATUS": "ERROR", "MSG": msg, "CODE": 200})
+        else:
+            return json.dumps({"STATUS": "ERROR", "MSG": "Internal error", "CODE": 500})
+
 @delete('/category/<id>')
 def deleteCategory(id):
     try:
@@ -113,6 +160,7 @@ def deleteCategory(id):
             return json.dumps({"STATUS": "SUCCESS", "CODE": 201})
     except:
         return json.dumps({"STATUS": "ERROR", "MSG": "Internal error", "CODE": 500})
+
 @delete('/product/<id>')
 def deleteProduct(id):
     try:
@@ -123,4 +171,5 @@ def deleteProduct(id):
             return json.dumps({"STATUS": "SUCCESS", "CODE": 201})
     except:
         return json.dumps({"STATUS": "ERROR", "MSG": "Internal error", "CODE": 500})
-run(host='localhost', port=7000)
+
+run(host='localhost', port=7000, debug = True)

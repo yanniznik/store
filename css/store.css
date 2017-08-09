@@ -76,3 +76,9 @@ body{
     opacity:1;
 }
 
+.pagination-holder > span {
+    border: 1px solid;
+    margin: 10px 5px;
+    padding: 5px 23px;
+    display: inline-block;
+}
